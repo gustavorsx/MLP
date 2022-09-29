@@ -22,8 +22,8 @@ public class Perceptron {
         wo = gerarRandomW(wo);
     }
 
-    public double[] learn(double[] xIn, double[] y) {
-        double[] x = fill(xIn);
+    public Double[] learn(Double[] xIn, Double[] y) {
+        Double[] x = fill(xIn);
         double[] hiddenOut = new double[qtdH + 1];
 
         for (int j = 0; j < qtdH; j++) {
@@ -34,10 +34,10 @@ public class Perceptron {
         }
         hiddenOut[qtdH] = 1;
 
-        double[] teta = new double[qtdOut];
+        Double[] teta = new Double[qtdOut];
         for (int j = 0; j < qtdOut; j++) {
             for (int i = 0; i < hiddenOut.length; i++) {
-                teta[j] += hiddenOut[i] * wo[i][j];
+                teta[j] = hiddenOut[i] * wo[i][j];
             }
             teta[j] = sigmoid(teta[j]);
         }
@@ -76,8 +76,8 @@ public class Perceptron {
         return teta;
     }
 
-    public double[] train(double[] xIn, double[] y) {
-        double[] x = fill(xIn);
+    public Double[] train(Double[] xIn, Double[] y) {
+        Double[] x = fill(xIn);
         double[] hiddenOut = new double[qtdH + 1];
 
         for (int j = 0; j < qtdH; j++) {
@@ -88,8 +88,9 @@ public class Perceptron {
         }
         hiddenOut[qtdH] = 1;
 
-        double[] teta = new double[qtdOut];
+        Double[] teta = new Double[qtdOut];
         for (int j = 0; j < qtdOut; j++) {
+            teta[0] = 0d;
             for (int i = 0; i < hiddenOut.length; i++) {
                 teta[j] += hiddenOut[i] * wo[i][j];
             }
@@ -98,13 +99,13 @@ public class Perceptron {
         return teta;
     }
 
-    private double[] fill(double[] x) {
-        double[] x_new = new double[x.length + 1];
+    private Double[] fill(Double[] x) {
+        Double[] x_new = new Double[x.length + 1];
         for (int i = 0; i < x.length; i++) {
             x_new[i] = x[i];
         }
         
-        x_new[x_new.length - 1] = 1;
+        x_new[x_new.length - 1] = 1d;
         return x_new;
     }
 
@@ -118,8 +119,8 @@ public class Perceptron {
         return w;
     }
 
-    private double sigmoid(double u) {
-        double value = 1 / (1 + Math.exp(-u));
+    private Double sigmoid(Double u) {
+        Double value = 1 / (1 + Math.exp(-u));
         return value;
     }
 }

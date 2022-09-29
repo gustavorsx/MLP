@@ -4,6 +4,9 @@ import app.Perceptron;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,13 +14,13 @@ import java.util.List;
 import java.util.Scanner;
 
 public class PerceptronRunner {
-    public static void main(String[] args) throws FileNotFoundException {
+    public static void main(String[] args) throws FileNotFoundException, IOException {
 
         final int QTD_IN = 9;
         final int QTD_OUT = 1;
         final int QTD_H = 9;
         final double U = 0.01;
-        final int EPOCA = 100000;
+        final int EPOCA = 10000;
 
         /* AND */
         // final double[][][] DATABASE = {
@@ -56,170 +59,137 @@ public class PerceptronRunner {
         // };
 
         Perceptron p = new Perceptron(QTD_IN, QTD_OUT, QTD_H, U);
-
+        
         double erroEpTreino = 0;
         double erroAmTreino = 0;
         double erroEpTeste = 0;
         double erroAmTeste = 0;
-        List<double[][][]> listBase = teste();
-        double[][][] trainingBase = listBase.get(0);
-        double[][][] testBase = listBase.get(1);
+        List<List<Double[][]>> listBase = teste();
+        List<Double[][]> trainingBase = listBase.get(0);
+        List<Double[][]> testBase = listBase.get(1);
+        List<String> str = new ArrayList<String>();
         for (int e = 0; e < EPOCA; e++) {
             erroEpTreino = 0;
             erroEpTeste = 0;
 
-            for (int a = 0; a < trainingBase.length; a++) {
-                double[] x = trainingBase[a][0];
-                double[] y = trainingBase[a][1];
-                double[] out = p.learn(x, y);
+            for (int a = 0; a < trainingBase.size(); a++) {
+                Double[] x = trainingBase.get(a)[0];
+                Double[] y = trainingBase.get(a)[1];
+                Double[] out = p.learn(x, y);
                 erroAmTreino = somador(y, out);
                 erroEpTreino += erroAmTreino;
             }
-            imprimirTreino(erroEpTreino, e);
 
-            for (int a = 0; a < testBase.length; a++) {
-                double[] x = testBase[a][0];
-                double[] y = testBase[a][1];
-                double[] out = p.train(x, y);
+            for (int a = 0; a < testBase.size(); a++) {
+                Double[] x = testBase.get(a)[0];
+                Double[] y = testBase.get(a)[1];
+                Double[] out = p.train(x, y);
                 erroAmTeste = somador(y, out);
                 erroEpTeste += erroAmTeste;
             }
-            imprimirTeste(erroEpTeste, e);
+            str.add(e + " " + erroEpTreino + " " + erroEpTeste);
+            imprimirTeste(erroEpTreino, erroEpTeste, e);
         }
+        dataWriter(str);
     }
 
-    public static double somador(double[] y, double[] out) {
-        double soma = 0;
+    public static Double somador(Double[] y, Double[] out) {
+        Double soma = 0d;
         for (int i = 0; i < y.length; i++) {
             soma += Math.abs(y[i] - out[i]);
         }
         return soma;
     }
 
-    public static void imprimirTreino(double erroEp, int epoca) {
-        System.out.println("Epoca treino " + (epoca + 1) + "   erro: " + erroEp);
-    }
-    public static void imprimirTeste(double erroEp, int epoca) {
-        System.out.println("Epoca teste " + (epoca + 1) + "   erro: " + erroEp);
+    public static void imprimirTeste(double erroEpTreino, double erroEpTeste, int epoca) {
+        System.out.println("Epoca teste " + (epoca + 1) + "   erro: " + erroEpTreino + " " + erroEpTeste);
     }
 
-    public static double[][][] dataReader() throws FileNotFoundException {
-        double[][][] base = new double[286][2][];
+    public static List<List<Double[][]>> dataReader() throws FileNotFoundException {
+        List<Double[][]> base0 = new ArrayList<Double[][]>();
+        List<Double[][]> base1 = new ArrayList<Double[][]>();
+        List<List<Double[][]>> bases = new ArrayList<List<Double[][]>>();
         double[] data = new double[9];
-        File file = new File("breast-cancer.data");
+        File file = new File("src/breast-cancer.data");
         Scanner scn = new Scanner(file);
-        double out = 0;
-
-        int cont = 0;
-        for (int i = 0; i < 286; i++) {
-            String linha = scn.nextLine();
-
-            data = inFill(linha);
-
-            base[cont][0] = new double[9];
-            for (int j = 0; j < 9; j++) {
-                base[cont][0][j] = data[j];
-            }
-            out = data[9];
-            if (out == 0) {
-                base[cont][1] = new double[] { 0 };
-            } else if (out == 1) {
-                base[cont][1] = new double[] { 1 };
-            }
-            cont++;
-        }
-        scn.close();
-        return base;
-    }
-
-    public static List<double[][][]> teste() throws FileNotFoundException {
-        double[][][] base = dataReader();
-        double[] data = new double[9];
-        double[][][] base0 = new double[286][2][9];
-        double[][][] base1 = new double[286][2][9];
-        double[][][] trainingBase;
-        double[][][] testBase;
         double out = 0;
 
         int cont0 = 0;
         int cont1 = 0;
         for (int i = 0; i < 286; i++) {
-            if (base[i][1][0] == 0) {
+            String linha = scn.nextLine();
+
+            data = inFill(linha);
+
+            out = data[9];
+            if (out == 0) {
+                var n = new Double[2][];
+                n[0] = new Double[9];
+                n[1] = new Double[] { 0d };
                 for (int j = 0; j < 9; j++) {
-                    base0[cont0][0][j] = base[i][0][j];
+                    n[0][j] = data[j];
                 }
-                base0[cont0][1][0] = base[i][1][0];
-                cont0++;
-            } else if (base[i][1][0] == 1) {
+                base0.add(n);
+            } else if (out == 1) {
+                var n = new Double[2][];
+                n[0] = new Double[9];
+                n[1] = new Double[] { 1d };
                 for (int j = 0; j < 9; j++) {
-                    base1[cont1][0][0] = base[i][0][0];
+                    n[0][j] = data[j];
                 }
-                base1[cont1][1][0] = base[i][1][0];
-                cont1++;
+                base1.add(n);
             }
+            cont0++;
+            cont1++;
         }
-        testBase = new double[Math.abs(cont0 / 4) + Math.abs(cont1 / 4)][2][9];
-        int contfor1 = 0;
-        for (int i = 0; i < Math.abs(cont0 / 4); i++) {
-            for (int j = 0; j < 9; j++) {
-                testBase[contfor1][0][j] = base0[i][0][j];
-            }
-            testBase[contfor1][1] = new double[] { base0[i][1][0] };
-            contfor1++;
+        bases.add(base0);
+        bases.add(base1);
+        scn.close();
+        return bases;
+    }
+
+    public static List<List<Double[][]>> teste() throws FileNotFoundException {
+        List<List<Double[][]>> basesList = dataReader();
+        int trainingBase0Size = basesList.get(0).size() * 3 / 4;
+        int testBase0Size = basesList.get(0).size() * 1 / 4;
+        int trainingBase1Size = basesList.get(1).size() * 3 / 4;
+        int testBase1Size = basesList.get(1).size() * 1 / 4;
+
+        if ((testBase0Size + trainingBase0Size) < basesList.get(0).size())
+            trainingBase0Size++;
+
+        if ((testBase1Size + trainingBase1Size) < basesList.get(1).size())
+            trainingBase1Size++;
+
+        List<Double[][]> trainingBase = new ArrayList<Double[][]>();
+        List<Double[][]> testBase = new ArrayList<Double[][]>();
+
+        Collections.shuffle(basesList.get(0));
+        Collections.shuffle(basesList.get(1));
+
+        for (int i = 0; i < trainingBase0Size; i++) {
+            var t = basesList.get(0).get(0);
+            trainingBase.add(t);
+            basesList.get(0).remove(0);
+        }
+        for (int i = 0; i < trainingBase1Size; i++) {
+            var t = basesList.get(1).get(0);
+            trainingBase.add(t);
+            basesList.get(1).remove(0);
         }
 
-        for (int i = 0; i < Math.abs(cont1 / 4); i++) {
-            for (int j = 0; j < 9; j++) {
-                testBase[contfor1][0][j] = base1[i][0][j];
-            }
-            testBase[contfor1][1] = new double[] { base1[i][1][0] };
-            contfor1++;
+        for (int i = 0; i < testBase0Size; i++) {
+            var t = basesList.get(0).get(0);
+            testBase.add(t);
+            basesList.get(0).remove(0);
+        }
+        for (int i = 0; i < testBase1Size; i++) {
+            var t = basesList.get(1).get(0);
+            testBase.add(t);
+            basesList.get(1).remove(0);
         }
 
-        List<double[][]> t1 = new ArrayList<double[][]>();
-        for (int i = 0; i < testBase.length; i++) {
-            t1.add(testBase[i]);  
-        }
-        Collections.shuffle(t1);
-        for (int i = 0; i < contfor1; i++) {
-            double[][] d = t1.get(i);
-            for (int j = 0; j < 9; j++) {
-                testBase[i][0][j] = d[0][j];
-            }
-            testBase[i][1] = new double[] { d[1][0] };
-        }
-
-        int la = (int) (Math.round(cont0 * 0.75) + Math.round(cont1 * 0.75));
-        trainingBase = new double[la][2][9];
-        int cont2 = 0;
-        for (int i = Math.abs(cont0 / 4); i < cont0; i++) {
-            for (int j = 0; j < 9; j++) {
-                trainingBase[cont2][0][j] = base0[i][0][j];
-            }
-            trainingBase[cont2][1] = new double[] { base0[i][1][0] };
-            cont2++;
-        }
-
-        for (int i = Math.abs(cont1 / 4); i < cont1; i++) {
-            for (int j = 0; j < 9; j++) {
-                trainingBase[cont2][0][j] = base1[i][0][j];
-            }
-            trainingBase[cont2][1] = new double[] { base1[i][1][0] };
-            cont2++;
-        }
-        List<double[][]> t = new ArrayList<double[][]>();
-        for (int i = 0; i < trainingBase.length; i++) {
-            t.add(trainingBase[i]);  
-        }
-        Collections.shuffle(t);
-        for (int i = 0; i < cont2; i++) {
-            double[][] d = t.get(i);
-            for (int j = 0; j < 9; j++) {
-                trainingBase[i][0][j] = d[0][j];
-            }
-            trainingBase[i][1] = new double[] { d[1][0] };
-        }
-        List<double[][][]> l = new ArrayList<double[][][]>();
+        List<List<Double[][]>> l = new ArrayList<List<Double[][]>>();
         l.add(trainingBase);
         l.add(testBase);
         return l;
@@ -231,4 +201,14 @@ public class PerceptronRunner {
                 .mapToDouble(Double::parseDouble).toArray();
         return entradas;
     }
+
+    public static void dataWriter(List<String> str) throws IOException {
+        FileWriter fwEpoca = new FileWriter("erros.txt");
+        PrintWriter printWriterEpoca = new PrintWriter(fwEpoca);
+        for (String string : str) {
+            printWriterEpoca.println(string);;
+        }
+        printWriterEpoca.close();
+    }
+
 }
