@@ -114,8 +114,6 @@ public class PerceptronRunner {
         Scanner scn = new Scanner(file);
         double out = 0;
 
-        int cont0 = 0;
-        int cont1 = 0;
         for (int i = 0; i < 286; i++) {
             String linha = scn.nextLine();
 
@@ -139,8 +137,6 @@ public class PerceptronRunner {
                 }
                 base1.add(n);
             }
-            cont0++;
-            cont1++;
         }
         bases.add(base0);
         bases.add(base1);
@@ -155,10 +151,10 @@ public class PerceptronRunner {
         int trainingBase1Size = basesList.get(1).size() * 3 / 4;
         int testBase1Size = basesList.get(1).size() * 1 / 4;
 
-        if ((testBase0Size + trainingBase0Size) < basesList.get(0).size())
+        while ((testBase0Size + trainingBase0Size) < basesList.get(0).size())
             trainingBase0Size++;
 
-        if ((testBase1Size + trainingBase1Size) < basesList.get(1).size())
+        while ((testBase1Size + trainingBase1Size) < basesList.get(1).size())
             trainingBase1Size++;
 
         List<Double[][]> trainingBase = new ArrayList<Double[][]>();

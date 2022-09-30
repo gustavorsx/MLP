@@ -3,20 +3,20 @@ package app;
 import java.util.Random;
 
 public class Perceptron {
-    private double u;
+    private Double u;
     private int qtdIn, qtdOut, qtdH;
-    private double[][] wh;
-    private double[][] wo;
-    private double interA = -0.3;
-    private double interB = 0.3;
+    private Double[][] wh;
+    private Double[][] wo;
+    private Double interA = -0.3;
+    private Double interB = 0.3;
 
-    public Perceptron(int qtdIn, int qtdOut, int qtdH, double u) {
+    public Perceptron(int qtdIn, int qtdOut, int qtdH, Double u) {
         this.u = u;
         this.qtdIn = qtdIn;
         this.qtdOut = qtdOut;
         this.qtdH = qtdH;
-        wh = new double[qtdIn + 1][qtdH];
-        wo = new double[qtdH + 1][qtdOut];
+        wh = new Double[qtdIn + 1][qtdH];
+        wo = new Double[qtdH + 1][qtdOut];
         
         wh = gerarRandomW(wh);
         wo = gerarRandomW(wo);
@@ -24,32 +24,33 @@ public class Perceptron {
 
     public Double[] learn(Double[] xIn, Double[] y) {
         Double[] x = fill(xIn);
-        double[] hiddenOut = new double[qtdH + 1];
-
+        Double[] hiddenOut = new Double[qtdH + 1];
         for (int j = 0; j < qtdH; j++) {
+            hiddenOut[j] = 0d;
             for (int i = 0; i < x.length; i++) {
                 hiddenOut[j] += x[i] * wh[i][j];
             }
             hiddenOut[j] = sigmoid(hiddenOut[j]);;
         }
-        hiddenOut[qtdH] = 1;
+        hiddenOut[qtdH] = 1d;
 
         Double[] teta = new Double[qtdOut];
         for (int j = 0; j < qtdOut; j++) {
+            teta[j] = 0d;
             for (int i = 0; i < hiddenOut.length; i++) {
                 teta[j] = hiddenOut[i] * wo[i][j];
             }
             teta[j] = sigmoid(teta[j]);
         }
 
-        double[] deltaO = new double[qtdOut];
+        Double[] deltaO = new Double[qtdOut];
         for (int j = 0; j < qtdOut; j++) {
             deltaO[j] = teta[j] * (1 - teta[j]) * (y[j] - teta[j]);
         }
 
-        double[] deltaH = new double[qtdH];
+        Double[] deltaH = new Double[qtdH];
         for (int h = 0; h < qtdH; h++) {
-            double soma = 0;
+            Double soma = 0d;
             for(int j = 0; j < qtdOut; j++) {
                 soma += deltaO[j] * wo[h][j];
             };
@@ -78,19 +79,20 @@ public class Perceptron {
 
     public Double[] train(Double[] xIn, Double[] y) {
         Double[] x = fill(xIn);
-        double[] hiddenOut = new double[qtdH + 1];
+        Double[] hiddenOut = new Double[qtdH + 1];
 
         for (int j = 0; j < qtdH; j++) {
+            hiddenOut[j] = 0d;
             for (int i = 0; i < x.length; i++) {
                 hiddenOut[j] += x[i] * wh[i][j];
             }
             hiddenOut[j] = sigmoid(hiddenOut[j]);;
         }
-        hiddenOut[qtdH] = 1;
+        hiddenOut[qtdH] = 1d;
 
         Double[] teta = new Double[qtdOut];
         for (int j = 0; j < qtdOut; j++) {
-            teta[0] = 0d;
+            teta[j] = 0d;
             for (int i = 0; i < hiddenOut.length; i++) {
                 teta[j] += hiddenOut[i] * wo[i][j];
             }
@@ -109,11 +111,11 @@ public class Perceptron {
         return x_new;
     }
 
-    private double[][] gerarRandomW(double[][] w) {
+    private Double[][] gerarRandomW(Double[][] w) {
         Random random = new Random();
         for (int i = 0; i < w.length; i++) {
             for (int j = 0; j < w[0].length; j++) {
-                w[i][j] = random.nextDouble(this.interA, this.interB);
+                w[i][j] = this.interA + (this.interA - this.interB)*random.nextDouble();
             }
         }
         return w;
