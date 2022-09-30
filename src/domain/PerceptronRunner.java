@@ -18,8 +18,8 @@ public class PerceptronRunner {
 
         final int QTD_IN = 9;
         final int QTD_OUT = 1;
-        final int QTD_H = 9;
-        final double U = 0.01;
+        final int QTD_H = 5;
+        final double U = 0.0001;
         final int EPOCA = 10000;
 
         /* AND */
@@ -59,12 +59,12 @@ public class PerceptronRunner {
         // };
 
         Perceptron p = new Perceptron(QTD_IN, QTD_OUT, QTD_H, U);
-        
+
         double erroEpTreino = 0;
         double erroAmTreino = 0;
         double erroEpTeste = 0;
         double erroAmTeste = 0;
-        List<List<Double[][]>> listBase = teste();
+        List<List<Double[][]>> listBase = divideBase();
         List<Double[][]> trainingBase = listBase.get(0);
         List<Double[][]> testBase = listBase.get(1);
         List<String> str = new ArrayList<String>();
@@ -105,7 +105,7 @@ public class PerceptronRunner {
         System.out.println("Epoca teste " + (epoca + 1) + "   erro: " + erroEpTreino + " " + erroEpTeste);
     }
 
-    public static List<List<Double[][]>> dataReader() throws FileNotFoundException {
+    public static List<List<Double[][]>> dataReader() throws FileNotFoundException,IOException {
         List<Double[][]> base0 = new ArrayList<Double[][]>();
         List<Double[][]> base1 = new ArrayList<Double[][]>();
         List<List<Double[][]>> bases = new ArrayList<List<Double[][]>>();
@@ -140,11 +140,13 @@ public class PerceptronRunner {
         }
         bases.add(base0);
         bases.add(base1);
+        dataWriterBase(bases.get(0), "base0");
+        dataWriterBase(bases.get(1), "base1");
         scn.close();
         return bases;
     }
 
-    public static List<List<Double[][]>> teste() throws FileNotFoundException {
+    public static List<List<Double[][]>> divideBase() throws FileNotFoundException, IOException {
         List<List<Double[][]>> basesList = dataReader();
         int trainingBase0Size = basesList.get(0).size() * 3 / 4;
         int testBase0Size = basesList.get(0).size() * 1 / 4;
@@ -187,7 +189,9 @@ public class PerceptronRunner {
 
         List<List<Double[][]>> l = new ArrayList<List<Double[][]>>();
         l.add(trainingBase);
+        dataWriterBase(l.get(0), "trainingBase");
         l.add(testBase);
+        dataWriterBase(l.get(1), "testBase");
         return l;
     }
 
@@ -202,8 +206,30 @@ public class PerceptronRunner {
         FileWriter fwEpoca = new FileWriter("erros.txt");
         PrintWriter printWriterEpoca = new PrintWriter(fwEpoca);
         for (String string : str) {
-            printWriterEpoca.println(string);;
+            printWriterEpoca.println(string);
         }
+        printWriterEpoca.close();
+    }
+
+    public static void dataWriterBase(List<Double[][]> str, String base) throws IOException {
+        FileWriter fwEpoca = new FileWriter(base+".txt");
+        PrintWriter printWriterEpoca = new PrintWriter(fwEpoca);
+        List<String> s = new ArrayList<String>();
+        String p = new String();
+        for (int i = 0; i < str.size(); i++) {
+            for (int j = 0; j < str.get(i)[0].length; j++) {
+                p += str.get(i)[0][j] + ", ";
+            }
+
+            p += str.get(i)[1][0];
+
+            s.add(p);
+            p = "";
+        }
+        for (String string : s) {
+            printWriterEpoca.println(string);
+        }
+
         printWriterEpoca.close();
     }
 
